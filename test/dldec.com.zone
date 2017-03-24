@@ -1,0 +1,16 @@
+defaults :ttl => 3600
+
+zone 'dldec.com' do
+  SOA  '@', 'burst.dldinternet.com.', email: 'hostmaster.delionsden.com.', serial: '2014060701', refresh: 3600, retry: 300, expire: 3600, ttl: 3600
+  A    '@', '66.197.207.182'
+  MX  zone, 'ASPMX.L.GOOGLE.com.',         priority: 10
+  MX  zone, 'ALT1.ASPMX.L.GOOGLE.com.',    priority: 20
+  MX  zone, 'ALT2.ASPMX.L.GOOGLE.com.',    priority: 20
+  MX  zone, 'ASPMX2.GOOGLEMAIL.com.',      priority: 30
+  MX  zone, 'ASPMX3.GOOGLEMAIL.com.',      priority: 30
+  NS  zone, 'ns1.thedomainnamesystem.com.'
+  NS  zone, 'ns2.thedomainnamesystem.com.'
+  NS  zone, 'ns3.thedomainnamesystem.com.'
+  TXT zone, "google-site-verification=nOiMzB2uS6748rq4HUsCHfqrS5o88JVbNpOaAt8vH0c"
+  A 'www.dldec.com.', '66.197.207.182'
+end
