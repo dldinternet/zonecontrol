@@ -1,9 +1,8 @@
 require 'dldinternet/zonecontrol'
-require 'dldinternet/zonecontrol/dsl'
 
 module DLDInternet
   module ZoneControl
-    class Main < DLDInternet::Thor::Command
+    class Main < DLDInternet::ZoneControl::Thor::Command
       class_option :verbose,      type: :boolean
       class_option :debug,        type: :boolean
       class_option :trace,        type: :boolean
@@ -11,6 +10,7 @@ module DLDInternet
       class_option :provider,     type: :string, aliases: '-p'
       class_option :format,       type: :string, default: :none, aliases: [ '--output']
       class_option :config,       type: :string, default: '~/.config/doctl/config.yaml'
+      class_option :destination,  type: :string, aliases: [ '--target']#, default: ''
 
       desc 'push FILES', "Update live DNS servers with changes from FILES"
       method_option :force, :type => :boolean, :aliases => "-f"
@@ -37,45 +37,18 @@ module DLDInternet
       end
 
       desc 'print FILES', "Print the DNS records described by FILES"
+      method_option :namelength,       type: :numeric, aliases: [ '--namewidth']
       def print *files
+        command_pre(files)
         each_zone files do |zone|
-          puts;puts
-          Clouddns::Actions::Print.run(zone)
+          DLDInternet::ZoneControl::Actions::Print.run(zone, self)
         end
         0
       end
 
-      desc 'zonefile FILES', "Print the zonefile described by FILES"
-      def zonefile *files
-        each_zone files do |zone|
-          puts;puts
-          Clouddns::Actions::Zonefile.run(zone)
-        end
-        0
-      end
+      desc 'zonefile SUBCOMMAND', "Manipulate zonefiles"
+      subcommand 'zonefile', ::DLDInternet::ZoneControl::ZoneFile::Command
 
-      private
-
-      def each_zone(files)
-        files = files_list(files)
-        files.each do |file|
-          dsl = Clouddns::DSL.parse_file(file)
-          dsl.zones.each do |zone|
-            yield zone, dsl.fog_options
-          end
-        end
-      end
-
-      def files_list(files)
-        list = files.map do |filename|
-          if File.exist?(filename)
-            filename
-          else
-            Dir.glob(filename)
-          end
-        end
-        list.flatten
-      end
     end
   end
 end

@@ -1,0 +1,33 @@
+;
+;  Database file unknown for dldec.com. zone.
+;	Zone version: 2014060701
+;
+dldec.com.		3600 IN  SOA  burst.dldinternet.com. hostmaster.delionsden.com. (
+				2014060701	; serial number
+				3600	; refresh
+				300	; retry
+				3600	; expire
+				3600	; minimum TTL
+				)
+
+$ORIGIN dldec.com.
+
+
+; Zone NS Records
+dldec.com.	3600		NS	ns1.thedomainnamesystem.com.
+dldec.com.	3600		NS	ns2.thedomainnamesystem.com.
+dldec.com.	3600		NS	ns3.thedomainnamesystem.com.
+
+; Zone MX Records
+dldec.com.	3600		MX	10 ASPMX.L.GOOGLE.com.
+dldec.com.	3600		MX	20 ALT1.ASPMX.L.GOOGLE.com.
+dldec.com.	3600		MX	20 ALT2.ASPMX.L.GOOGLE.com.
+dldec.com.	3600		MX	30 ASPMX2.GOOGLEMAIL.com.
+dldec.com.	3600		MX	30 ASPMX3.GOOGLEMAIL.com.
+
+; Zone A Records
+dldec.com.	3600		A	66.197.207.182
+www.dldec.com.	3600		A	66.197.207.182
+
+; Zone TXT Records
+dldec.com.	3600		TXT	google-site-verification=nOiMzB2uS6748rq4HUsCHfqrS5o88JVbNpOaAt8vH0c

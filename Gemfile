@@ -24,7 +24,6 @@ source 'https://rubygems.org' do
 
     gem 'dldinternet-mixlib-thor',     :path => '../../ws/gems-ws/dldinternet-mixlib-thor',     :group => :development
     gem 'dldinternet-mixlib-logging',  :path => '../../ws/gems-ws/dldinternet-mixlib-logging',     :group => :development
-    gem 'clouddns',  :path => '../clouddns',     :group => :development
   end
 
 end

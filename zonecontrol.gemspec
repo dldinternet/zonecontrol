@@ -30,9 +30,9 @@ Gem::Specification.new do |gem|
   gem.executables   = gem.files.grep(%r{^exe/}) { |f| File.basename(f) }
   gem.require_paths = ["lib"]
 
-  gem.add_dependency "clouddns", ">= 0.1.0"
   gem.add_dependency 'dldinternet-mixlib-thor', '>= 0.3.0'
   gem.add_dependency 'zonefile', '>= 1.0.4'
+  gem.add_dependency 'hashie', '>= 0'
 
   gem.add_development_dependency "bundler", "~> 1.14"
   gem.add_development_dependency "rake", "~> 10.0"
