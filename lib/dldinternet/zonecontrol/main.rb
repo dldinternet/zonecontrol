@@ -8,20 +8,21 @@ module DLDInternet
       class_option :trace,        type: :boolean
       class_option :log_level,    type: :string, banner: 'Log level ([:trace, :debug, :info, :step, :warn, :error, :fatal, :todo])'
       class_option :provider,     type: :string, aliases: '-p'
+      class_option :credentials,  type: :string, aliases: '-C'
       class_option :format,       type: :string, default: :none, aliases: [ '--output']
-      class_option :config,       type: :string, default: '~/.config/doctl/config.yaml'
+      class_option :config,       type: :string, default: '~/.config/zonecontrol/config.yaml'
       class_option :destination,  type: :string, aliases: [ '--target']#, default: ''
 
       desc 'push FILES', "Update live DNS servers with changes from FILES"
       method_option :force, :type => :boolean, :aliases => "-f"
       def push *files
-        opts = {fog: {}}
+        command_pre(files)
+        opts = {fog: options[:fog].to_hash || {}}
         opts[:fog][:provider] = options[:provider] if options[:provider]
         opts[:force] = !!options[:force]
         each_zone files do |zone, fog_options|
-          puts;puts
           o = opts.merge({fog: opts.fetch(:fog, {}).merge(fog_options)})
-          Clouddns::Actions::Migrate.run(zone, o)
+          DLDInternet::ZoneControl::Actions::Push.run(zone, self, o)
         end
         0
       end

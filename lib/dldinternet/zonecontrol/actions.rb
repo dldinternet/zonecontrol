@@ -1,5 +1,5 @@
 require 'dldinternet/zonecontrol/actions/generic_action'
-require 'dldinternet/zonecontrol/actions/migrate'
+require 'dldinternet/zonecontrol/actions/push'
 require 'dldinternet/zonecontrol/actions/zonefile'
 require 'dldinternet/zonecontrol/actions/print'
 

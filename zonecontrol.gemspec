@@ -33,6 +33,8 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'dldinternet-mixlib-thor', '>= 0.3.0'
   gem.add_dependency 'zonefile', '>= 1.0.4'
   gem.add_dependency 'hashie', '>= 0'
+  gem.add_dependency 'fog', '>= 0.9.0'
+  gem.add_dependency 'thor', '>= 0.19.4'
 
   gem.add_development_dependency "bundler", "~> 1.14"
   gem.add_development_dependency "rake", "~> 10.0"

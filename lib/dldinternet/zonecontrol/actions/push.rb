@@ -2,11 +2,12 @@
 module DLDInternet
   module ZoneControl
     module Actions
-      class Migrate < GenericAction
+      class Push < GenericAction
         def run
           require 'fog'
+          require 'hashie/mash'
 
-          @fog = Fog::DNS.new(@options[:fog])
+          @fog = Fog::DNS.new(Hashie::Mash.new(@options[:fog]))
           @fog_zone = @fog.zones.find { |z| z.domain == @zone.name }
 
           puts
