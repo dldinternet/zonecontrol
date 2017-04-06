@@ -4,11 +4,11 @@ require 'rubygems'
 
 path = File.dirname(__FILE__)
 if File.exists?("#{path}/../.gitignore")
-  %w(dldinternet-mixlib-logging dldinternet-mixlib-thor).each do |mod|
+  %w(dldinternet-mixlib-logging dldinternet-mixlib-thor fog-digitalocean).each do |mod|
     add_path = File.expand_path(File.join(path, "../../../ws/gems-ws/#{mod}", "lib"))
     $:.unshift(add_path)
   end
-  %w(clouddns).each do |mod|
+  %w().each do |mod|
     add_path = File.expand_path(File.join(path, "../../#{mod}", "lib"))
     $:.unshift(add_path)
   end

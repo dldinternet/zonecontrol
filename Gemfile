@@ -28,5 +28,13 @@ source 'https://rubygems.org' do
 
 end
 
+source 'http://gems.dldinternet.com' do
+
+  group :development, :test, :integration do
+    gem 'fog-digitalocean',  :path => '../../ws/gems-ws/fog-digitalocean',     :group => :development
+  end
+
+end
+
 # Specify your gem's dependencies in dldinternet-clouddns.gemspec
 gemspec

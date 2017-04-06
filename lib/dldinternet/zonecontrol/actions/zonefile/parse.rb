@@ -6,7 +6,7 @@ module DLDInternet
       module ZoneFile
         class Parse < GenericAction
           def run
-            write(@zone.dsl, '.zone')
+            write(@domain.dsl, '.zone')
           end
         end
       end

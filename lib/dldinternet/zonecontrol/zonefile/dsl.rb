@@ -8,11 +8,11 @@ module DLDInternet
         attr_reader :fog_options
 
         def initialize(filename=nil)
-          @zones = []
-          @zone = nil
-          @defaults = {}
+          @zones       = []
+          @domain      = nil
+          @defaults    = {}
           @fog_options = {}
-          @filename = filename.gsub(%r{\.zone$}, '')
+          @filename    = filename.gsub(%r{\.zone$}, '')
         end
 
         def self.parse_string(string, filename=nil)
@@ -71,25 +71,25 @@ module DLDInternet
         def add_record(type, *args)
           options = args[-1].is_a?(Hash) ? args.pop : {}
           name,value = args
-          name = @zone.name if name.eql?('@')
+          name = @domain.name if name.eql?('@')
           name = parse_domain(name)
           options = @defaults.merge(options)
           options[:primary] ||= value if type.downcase.to_sym == :soa
           options[:name] ||= name
           options[:host] ||= value
 
-          @zone.add_record(type, options)
+          @domain.add_record(type, options)
         end
 
         def zone(name=nil)
-          raise "zones cannot be nested" if @zone && name
+          raise "zones cannot be nested" if @domain && name
           if name
-            @zone = ::Zonefile.new('', @filename, parse_domain(name))
-            @zones << @zone
+            @domain = ::Zonefile.new('', @filename, parse_domain(name))
+            @zones << @domain
             yield
-            @zone = nil
+            @domain = nil
           else
-            @zone.name
+            @domain.name
           end
         end
 

@@ -6,7 +6,8 @@ module DLDInternet
       class_option :verbose,      type: :boolean
       class_option :debug,        type: :boolean
       class_option :trace,        type: :boolean
-      class_option :log_level,    type: :string, banner: 'Log level ([:trace, :debug, :info, :step, :warn, :error, :fatal, :todo])'
+      class_option :force,        type: :boolean, default: false
+      class_option :log_level,    type: :string, banner: 'Log level ([:trace, :debug, :info, :note, :warn, :error, :fatal, :todo])', default: 'note'
       class_option :provider,     type: :string, aliases: '-p'
       class_option :credentials,  type: :string, aliases: '-C'
       class_option :format,       type: :string, default: :none, aliases: [ '--output']
@@ -17,7 +18,8 @@ module DLDInternet
       method_option :force, :type => :boolean, :aliases => "-f"
       def push *files
         command_pre(files)
-        opts = {fog: options[:fog].to_hash || {}}
+        opts = {}
+        opts[:fog] = options[:fog].to_hash || {} rescue {}
         opts[:fog][:provider] = options[:provider] if options[:provider]
         opts[:force] = !!options[:force]
         each_zone files do |zone, fog_options|

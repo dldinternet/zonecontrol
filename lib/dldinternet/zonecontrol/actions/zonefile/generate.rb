@@ -6,7 +6,7 @@ module DLDInternet
       module ZoneFile
         class Generate < GenericAction
           def run
-            write(@zone.output)
+            write(@domain.output)
           end
         end
 

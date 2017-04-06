@@ -6,9 +6,10 @@ module DLDInternet
       class GenericAction < ::Thor::Shell::Basic
 
         def initialize(zone, command, options = {})
-          @zone = zone
+          @domain  = zone
           @command = command
           @options = options
+          @logger = command.logger
           super()
         end
         def self.run(zone, command, options = {})
@@ -21,8 +22,8 @@ module DLDInternet
         def write(output, ext='')
           if (destination = command.options[:destination])
             if File.directory?(destination)
-              if @zone.filename
-                path = File.join(destination, @zone.filename+ext)
+              if @domain.filename
+                path = File.join(destination, @domain.filename+ext)
                 command.logger.info "Write to #{path}"
                 File.write(path, output)
               else

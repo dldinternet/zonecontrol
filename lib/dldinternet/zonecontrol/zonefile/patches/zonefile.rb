@@ -16,24 +16,36 @@ class Zonefile
     }.flatten.max
   end
 
+  def type_map
+    @type_map ||= begin
+      Hash[Zonefile::RECORDS.dup.map { |type| [type.upcase, type.upcase] }].merge(
+          Hash[Zonefile::RECORDS.dup.map { |type| [type, type.upcase] }]).merge(
+          { 'a4' => 'AAAA', 'A4' => 'AAAA', })
+    end
+  end
+
   def add_record(type, data= {})
     if @@preserve_name then
       @lastname = data[:name] if data[:name].to_s != ''
       data[:name] = @lastname if data[:name].to_s == ''
     end
-    type = type.downcase.intern
-    if type == :soa
+    type = type_map[type]
+    # if !type.eql?(type_map[type])
+    #   type = type_map[type]
+    # end
+    type_ = type.to_s.downcase.intern
+    if type_ == :soa
       @soa.merge!(data)
       @soa[:origin] ||= @soa[:name]
       @origin = @soa[:origin]
       @soa.delete(:host)
-    elsif type == :txt
+    elsif type_ == :txt
       data[:text] ||= data[:host]
       data[:text].gsub!(%r{^['"]?(.*?)['"]?$}, '\1')
       data.delete(:host)
-      @records[type] << data
+      @records[type_] << ZoneRecord.create(type, data)
     else
-      @records[type] << data
+      @records[type_] << ZoneRecord.create(type, data)
     end
   end
 
@@ -156,77 +168,76 @@ zone '#{self.soa[:origin]}'	do
 # Zone NS Records
     ENDH
     self.ns.each do |ns|
-      # out << "  NS    '#{nameat(ns)}', '#{ns[:host]}'#{ttlclass(ns)}\n"
-      out << sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", ns[:name], ns[:ttl], 'NS', ns[:host])
+      out << "#{ns.format(options)}\n" # sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", ns[:name], ns[:ttl], 'NS', ns[:host])
     end
     out << "\n# Zone MX Records\n" unless self.mx.empty?
     self.mx.each do |mx|
-      out << sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %-5s %s\n", mx[:name], mx[:ttl], 'MX', mx[:pri], mx[:host])
+      out << "#{mx.format(options)}\n" # sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %-5s %s\n", mx[:name], mx[:ttl], 'MX', mx[:pri], mx[:host])
     end
 
     out << "\n# Zone A Records\n" unless self.a.empty?
     self.a.each do |a|
-      out << sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", a[:name], a[:ttl], 'A', a[:host])
+      out << "#{a.format(options)}\n" # sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", a[:name], a[:ttl], 'A', a[:host])
     end
 
     out << "\n# Zone CNAME Records\n" unless self.cname.empty?
     self.cname.each do |cn|
-      out << sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", cn[:name], cn[:ttl], 'A', cn[:host])
+      out << "#{cn.format(options)}\n" # sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", cn[:name], cn[:ttl], 'CNAME', cn[:host])
     end
 
     out << "\n# Zone AAAA Records\n" unless self.a4.empty?
     self.a4.each do |a4|
-      out << sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", a4[:name], a4[:ttl], 'A', a4[:host])
+      out << "#{a4.format(options)}\n" # sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", a4[:name], a4[:ttl], 'AAAA', a4[:host])
     end
 
     out << "\n# Zone TXT Records\n" unless self.txt.empty?
     self.txt.each do |tx|
-      out << sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", tx[:name], tx[:ttl], 'TXT', tx[:text])
+      out << "#{tx.format(options)}\n" # sprintf("%-#{options[:namelength] ||18}s %5i IN %-5s %s\n", tx[:name], tx[:ttl], 'TXT', tx[:text])
     end
 
     out << "\n# Zone SRV Records\n" unless self.srv.empty?
     self.srv.each do |srv|
-      out << "  SRV    '#{srv[:name]}', '#{srv[:host]}', pri: #{srv[:pri]}, weight: #{srv[:weight]}, port: #{srv[:port]}#{ttlclass(srv)}\n"
+      out << "#{srv.format(options)}\n" # "  SRV    '#{srv[:name]}', '#{srv[:host]}', pri: #{srv[:pri]}, weight: #{srv[:weight]}, port: #{srv[:port]}#{ttlclass(srv)}\n"
     end
 
     out << "\n# Zone PTR Records\n" unless self.ptr.empty?
     self.ptr.each do |ptr|
-      out << "  PTR    '#{ptr[:name]}', '#{ptr[:host]}'#{ttlclass(ptr)}\n"
+      out << "#{ptr.format(options)}\n" # "  PTR    '#{ptr[:name]}', '#{ptr[:host]}'#{ttlclass(ptr)}\n"
     end
 
     out << "\n# Zone DS Records\n" unless self.ds.empty?
     self.ds.each do |ds|
-      out << "  DS     '#{ds[:name]}', nil, key_tag: '#{ds[:key_tag]}', algorithm: '#{ds[:algorithm]}', digest_type: '#{ds[:digest_type]}', digest: '#{ds[:digest]}'#{ttlclass(ds)}\n"
+      out << "#{ds.format(options)}\n" # "  DS     '#{ds[:name]}', nil, key_tag: '#{ds[:key_tag]}', algorithm: '#{ds[:algorithm]}', digest_type: '#{ds[:digest_type]}', digest: '#{ds[:digest]}'#{ttlclass(ds)}\n"
     end
 
     out << "\n# Zone NSEC Records\n" unless self.ds.empty?
     self.nsec.each do |nsec|
-      out << "  NSEC   '#{nsec[:name]}', nil, next: '#{nsec[:next]}', types: '#{nsec[:types]}'#{ttlclass(nsec)}\n"
+      out << "#{nsec.format(options)}\n" # "  NSEC   '#{nsec[:name]}', nil, next: '#{nsec[:next]}', types: '#{nsec[:types]}'#{ttlclass(nsec)}\n"
     end
 
     out << "\n# Zone NSEC3 Records\n" unless self.ds.empty?
     self.nsec3.each do |nsec|
-      out << "  NSEC3  '#{nsec[:name]}', nil, algorithm: '#{nsec[:algorithm]}', flags: '#{nsec[:flags]}', iterations: '#{nsec3[:iterations]}', salt: '#{nsec3[:salt]}', next: '#{nsec[:next]}', types: '#{nsec[:types]}'#{ttlclass(nsec)}\n"
+      out << "#{nsec.format(options)}\n" # "  NSEC3  '#{nsec[:name]}', nil, algorithm: '#{nsec[:algorithm]}', flags: '#{nsec[:flags]}', iterations: '#{nsec3[:iterations]}', salt: '#{nsec3[:salt]}', next: '#{nsec[:next]}', types: '#{nsec[:types]}'#{ttlclass(nsec)}\n"
     end
 
     out << "\n# Zone NSEC3PARAM Records\n" unless self.ds.empty?
-    self.nsec3param.each do |nsec3param|
-      out << "  NSEC3PARAM '#{nsec[:name]}', nil, algorithm: '#{nsec[:algorithm]}', flags: '#{nsec[:flags]}', iterations: '#{nsec3[:iterations]}', salt: '#{nsec3[:salt]}'#{ttlclass(nsec)}\n"
+    self.nsec3param.each do |ns3p|
+      out << "#{ns3p.format(options)}\n" # "  NSEC3PARAM '#{nsec[:name]}', nil, algorithm: '#{nsec[:algorithm]}', flags: '#{nsec[:flags]}', iterations: '#{nsec3[:iterations]}', salt: '#{nsec3[:salt]}'#{ttlclass(nsec)}\n"
     end
 
     out << "\n# Zone DNSKEY Records\n" unless self.ds.empty?
     self.dnskey.each do |dnskey|
-      out << "  DNSKEY '#{dnskey[:name]}', nil, flag: '#{dnskey[:flag]}', protocol: '#{dnskey[:protocol]}', algorithm: '#{dnskey[:algorithm]}', public_key: '#{dnskey[:public_key]}'#{ttlclass(dnskey)}\n"
+      out << "#{dnskey.format(options)}\n" # "  DNSKEY '#{dnskey[:name]}', nil, flag: '#{dnskey[:flag]}', protocol: '#{dnskey[:protocol]}', algorithm: '#{dnskey[:algorithm]}', public_key: '#{dnskey[:public_key]}'#{ttlclass(dnskey)}\n"
     end
 
     out << "\n# Zone RRSIG Records\n" unless self.ds.empty?
     self.rrsig.each do |rrsig|
-      out << "  RRSIG  '#{rrsig[:name]}', nil, type_covered: '#{rrsig[:type_covered]}', algorithm: '#{rrsig[:algorithm]}', labels: '#{rrsig[:labels]}', original_ttl: #{rrsig[:original_ttl]}, expiration: '#{rrsig[:expiration]}', inception: '#{rrsig[:inception]}', key_tag: '#{rrsig[:key_tag]}', signer: '#{rrsig[:signer]}', signature: '#{rrsig[:signature]}'#{ttlclass(rrsig)}\n"
+      out << "#{rrsig.format(options)}\n" # "  RRSIG  '#{rrsig[:name]}', nil, type_covered: '#{rrsig[:type_covered]}', algorithm: '#{rrsig[:algorithm]}', labels: '#{rrsig[:labels]}', original_ttl: #{rrsig[:original_ttl]}, expiration: '#{rrsig[:expiration]}', inception: '#{rrsig[:inception]}', key_tag: '#{rrsig[:key_tag]}', signer: '#{rrsig[:signer]}', signature: '#{rrsig[:signature]}'#{ttlclass(rrsig)}\n"
     end
 
     out << "\n# Zone NAPTR Records\n" unless self.ds.empty?
     self.naptr.each do |naptr|
-      out << "  NAPTR  '#{naptr[:name]}', nil, order: '#{naptr[:order]}', preference: '#{naptr[:preference]}', flags: '#{naptr[:flags]}', service: '#{naptr[:service]}', regexp: '#{naptr[:regexp]}', replacement: '#{naptr[:replacement]}'#{ttlclass(naptr)}\n"
+      out << "#{naptr.format(options)}\n" # "  NAPTR  '#{naptr[:name]}', nil, order: '#{naptr[:order]}', preference: '#{naptr[:preference]}', flags: '#{naptr[:flags]}', service: '#{naptr[:service]}', regexp: '#{naptr[:regexp]}', replacement: '#{naptr[:replacement]}'#{ttlclass(naptr)}\n"
     end
 
     out

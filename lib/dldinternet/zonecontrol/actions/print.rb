@@ -5,7 +5,7 @@ module DLDInternet
       class Print < GenericAction
 
         def run()
-          puts @zone.print(command.options.to_hash.merge(@options))
+          puts @domain.print(command.options.to_hash.merge(@options))
         end
 
       end
